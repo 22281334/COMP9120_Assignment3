@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import psycopg2
-
+from Assignment3_PythonSkeleton import Login
 #####################################################
 ##  Database Connect
 #####################################################
@@ -37,6 +37,10 @@ def checkUserCredentials(userName):
     print(userName)
 
     userInfo = ['2', 'Chris', 'Christopher', 'Smith']
+
+    login=Login()
+    login.login()
+
 
     return userInfo
     
