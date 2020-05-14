@@ -15,7 +15,7 @@ def openConnection():
     # TODO - 用自己的用户名登陆
 
     userid = "y20s1c9120_"
-    passwd = ""
+    passwd = "11008492"
     myHost = "soit-db-pro-2.ucc.usyd.edu.au"
 
     # Create a connection to the database
@@ -102,8 +102,6 @@ def findUserIssues(user_id):
 '''
 Find the associated issues for the user with the given userId (user_id) based on the searchString provided as the parameter, and based on the assignment description
 '''
-
-
 def findIssueBasedOnExpressionSearchOnTitle(searchString):
     # TODO - find necessary issues using sql database based on search input
     print("search string '" + searchString + "'")
@@ -122,7 +120,7 @@ def findIssueBasedOnExpressionSearchOnTitle(searchString):
     } for row in issue_db]
 
     return issue
-
+###
 
 #####################################################
 ##  Issue (new_issue, get all, get details)
@@ -131,7 +129,7 @@ def findIssueBasedOnExpressionSearchOnTitle(searchString):
 def addIssue(title, creator, resolver, verifier, description):
     # TODO - add an issue
     # Insert a new issue to database
-    # return False if adding was unsuccessful 
+    # return False if adding was unsuccessful
     # return True if adding was successful
 
     return True
