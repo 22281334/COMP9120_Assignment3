@@ -151,8 +151,23 @@ def addIssue(title, creator, resolver, verifier, description):
     # Insert a new issue to database
     # return False if adding was unsuccessful
     # return True if adding was successful
+    # TODO - add an issue
 
-    return True
+    conn = openConnection()
+    try:
+        curs =conn.cursor()
+        curs.callproc("issue_insert", [title, creator, resolver, verifier, description])
+        output = curs.fetchone()
+        result = output[0]
+        conn.commit()
+
+    except result == 0:
+        return False
+
+    finally:
+        curs.close()
+        conn.close()
+        return True
 
 
 # Update the details of an issue having the provided issue_id with the values provided as parameters
@@ -161,4 +176,3 @@ def updateIssue(issue_id, title, creator, resolver, verifier, description):
 
     # return False if adding was unsuccessful
     # return True if adding was successful
-    return True
