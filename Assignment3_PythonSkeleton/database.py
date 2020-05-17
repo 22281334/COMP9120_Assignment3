@@ -12,7 +12,7 @@ Connects to the database using the connection string
 
 def openConnection():
     # connection parameters - ENTER YOUR LOGIN AND PASSWORD HERE
-    # TODO - 用自己的用户名登陆
+    # TODO -
 
     userid = "y20s1c9120_qyan5974"
     passwd = "490332368"
@@ -155,12 +155,13 @@ def addIssue(title, creator, resolver, verifier, description):
     conn = openConnection()
     try:
         curs =conn.cursor()
-        curs.execute("INSERT INTO a3_issue(title, description, creator, resolver, verifier) VALUES (%s, %s, %s, %s, %s)")
-        output = curs.fetchone()
-        result = output[0]
+        insert_query = """INSERT INTO a3_issue(title, description, creator, resolver, verifier) VALUES (%s, %s, %s, %s, %s)"""
+        insert_data = (title, description, creator, resolver, verifier)
+        curs.execute(insert_query, insert_data)
         conn.commit()
 
-    except result == 0:
+    except psycopg2.Error as e:
+        conn.rollback()
         return False
 
     finally:
@@ -178,12 +179,13 @@ def updateIssue(issue_id, title, creator, resolver, verifier, description):
     conn = openConnection()
     try:
         curs =conn.cursor()
-        curs.excute("UPDATE a3_issue SET title = %s, description = %s, resolver = %s, verifer = %s WHERE issue_id = %s")
-        output = curs.fetchone()
-        result = output[0]
+        update_query = """UPDATE a3_issue SET title = %s, description = %s, creator = %s, resolver = %s, verifer = %s WHERE issue_id = %s"""
+        update_data = (title, description, creator, resolver, verifier, issue_id)
+        curs.excute(update_query, update_data)
         conn.commit()
 
-    except result == 0:
+    except psycopg2.Error as e:
+        conn.rollback()
         return False
 
     finally:
