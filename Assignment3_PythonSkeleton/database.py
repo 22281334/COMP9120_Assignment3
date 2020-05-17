@@ -14,8 +14,8 @@ def openConnection():
     # connection parameters - ENTER YOUR LOGIN AND PASSWORD HERE
     # TODO - 用自己的用户名登陆
 
-    userid = "y20s1c9120_qyan5974"
-    passwd = "490332368"
+    userid = "y20s1c9120_dliu8727"
+    passwd = "490536519"
     myHost = "soit-db-pro-2.ucc.usyd.edu.au"
 
     # Create a connection to the database
@@ -152,22 +152,22 @@ def addIssue(title, creator, resolver, verifier, description):
     # return False if adding was unsuccessful
     # return True if adding was successful
 
+    print("In Add Issue")
     conn = openConnection()
     try:
-        curs =conn.cursor()
-        curs.execute("INSERT INTO a3_issue(title, description, creator, resolver, verifier) VALUES (%s, %s, %s, %s, %s)")
-        output = curs.fetchone()
-        result = output[0]
+        cursor = conn.cursor()
+        cursor.execute("""Insert into A3_ISSUE (TITLE,DESCRIPTION,CREATOR,RESOLVER,VERIFIER) values (%s,%s,%s,%s,%s)""",(title,creator,resolver,verifier,description,))
+        cursor.close()
         conn.commit()
-
-    except result == 0:
+    except:
+        print("Error in Add Issues!")
+        cursor.close()
+        conn.close()
         return False
-
-    finally:
-        curs.close()
+    else:
+        cursor.close()
         conn.close()
         return True
-
 
 # Update the details of an issue having the provided issue_id with the values provided as parameters
 def updateIssue(issue_id, title, creator, resolver, verifier, description):
