@@ -12,7 +12,7 @@ Connects to the database using the connection string
 
 def openConnection():
     # connection parameters - ENTER YOUR LOGIN AND PASSWORD HERE
-    # TODO -
+    # TODO - 用自己的用户名登陆
 
     userid = "y20s1c9120_qyan5974"
     passwd = "490332368"
@@ -152,20 +152,20 @@ def addIssue(title, creator, resolver, verifier, description):
     # return False if adding was unsuccessful
     # return True if adding was successful
 
+    print("In Add Issue")
     conn = openConnection()
     try:
-        curs =conn.cursor()
-        insert_query = """INSERT INTO a3_issue(title, description, creator, resolver, verifier) VALUES (%s, %s, %s, %s, %s)"""
-        insert_data = (title, description, creator, resolver, verifier)
-        curs.execute(insert_query, insert_data)
+        cursor = conn.cursor()
+        cursor.execute("""Insert into A3_ISSUE (TITLE,DESCRIPTION,CREATOR,RESOLVER,VERIFIER) values (%s,%s,%s,%s,%s)""",(title,creator,resolver,verifier,description,))
+        cursor.close()
         conn.commit()
-
-    except psycopg2.Error as e:
-        conn.rollback()
+    except:
+        print("Error in Add Issues!")
+        cursor.close()
+        conn.close()
         return False
-
-    finally:
-        curs.close()
+    else:
+        cursor.close()
         conn.close()
         return True
 
@@ -179,13 +179,12 @@ def updateIssue(issue_id, title, creator, resolver, verifier, description):
     conn = openConnection()
     try:
         curs =conn.cursor()
-        update_query = """UPDATE a3_issue SET title = %s, description = %s, creator = %s, resolver = %s, verifer = %s WHERE issue_id = %s"""
-        update_data = (title, description, creator, resolver, verifier, issue_id)
-        curs.excute(update_query, update_data)
+        curs.excute("UPDATE a3_issue SET title = %s, description = %s, resolver = %s, verifer = %s WHERE issue_id = %s")
+        output = curs.fetchone()
+        result = output[0]
         conn.commit()
 
-    except psycopg2.Error as e:
-        conn.rollback()
+    except result == 0:
         return False
 
     finally:
