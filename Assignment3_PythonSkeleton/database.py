@@ -155,23 +155,26 @@ def addIssue(title, creator, resolver, verifier, description):
     print("In Add Issue")
     conn = openConnection()
     try:
-        cursor = conn.cursor()
-        cursor.execute("""Insert into A3_ISSUE (TITLE,DESCRIPTION,CREATOR,RESOLVER,VERIFIER) values (%s,%s,%s,%s,%s)""",(title,creator,resolver,verifier,description,))
-        cursor.close()
+        curs = conn.cursor()
+        curs.execute("""Insert into A3_ISSUE (TITLE,DESCRIPTION,CREATOR,RESOLVER,VERIFIER) values (%s,%s,%s,%s,%s)""",(title,description,creator,resolver,verifier,))
         conn.commit()
-    except:
-        print("Error in Add Issues!")
-        cursor.close()
+        curs.close()
+
+
+    except psycopg2.Error as sqle:
+        print("psycopg2.Error : " + sqle.pgerror)
+        curs.close()
         conn.close()
         return False
+
     else:
-        cursor.close()
+        curs.close()
         conn.close()
         return True
 
 
 # Update the details of an issue having the provided issue_id with the values provided as parameters
-def updateIssue(issue_id, title, creator, resolver, verifier, description):
+def updateIssue(title, creator, resolver, verifier, description, issue_id):
     # TODO - update the issue using db
     # return False if adding was unsuccessful
     # return True if adding was successful
@@ -179,15 +182,24 @@ def updateIssue(issue_id, title, creator, resolver, verifier, description):
     conn = openConnection()
     try:
         curs =conn.cursor()
-        curs.excute("UPDATE a3_issue SET title = %s, description = %s, resolver = %s, verifer = %s WHERE issue_id = %s")
-        output = curs.fetchone()
-        result = output[0]
+        update_query = """UPDATE A3_ISSUE SET TITLE = %s, DESCRIPTION = %s, CREATOR = %s, RESOLVER = %s, VERIFIER = %s WHERE ISSUE_ID = %s"""
+        update_data = (title, description, creator, resolver, verifier, issue_id,)
+        curs.execute(update_query, update_data)
         conn.commit()
+        curs.close()
 
-    except result == 0:
+
+    except psycopg2.Error as sqle:
+        print("psycopg2.Error : " + sqle.pgerror)
+        curs.close()
+        conn.close()
         return False
 
-    finally:
+    else:
         curs.close()
         conn.close()
         return True
+
+
+
+
