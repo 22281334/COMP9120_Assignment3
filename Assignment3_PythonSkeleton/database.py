@@ -14,8 +14,8 @@ def openConnection():
     # connection parameters - ENTER YOUR LOGIN AND PASSWORD HERE
     # TODO - 用自己的用户名登陆
 
-    userid = "y20s1c9120_qyan5974"
-    passwd = "490332368"
+    userid = "y20s1c9120_dliu8727"
+    passwd = "490536519"
     myHost = "soit-db-pro-2.ucc.usyd.edu.au"
 
     # Create a connection to the database
@@ -76,6 +76,8 @@ def checkUserCredentials(userName):
 List all the user associated issues in the database for a given user 
 See assignment description for how to load user associated issues based on the user id (user_id)
 '''
+
+
 def findUserIssues(user_id):
     # TODO - list all user associated issues from db using sql
     print(user_id)
@@ -87,16 +89,16 @@ def findUserIssues(user_id):
                     join a3_user a on (a3_issue_new.creator = a.user_id) 
                     join a3_user b on (a3_issue_new.resolver = b.user_id)
                     join a3_user c on (a3_issue_new.verifier = c.user_id) 
-                    order by title""", (user_id,user_id,user_id,))
+                    order by title""", (user_id, user_id, user_id,))
         issue_db = curs.fetchall()
 
         issue = [{
-           'issue_id': str(row[0]),
-           'title': row[1],
-           'creator': row[2],
-           'resolver': row[3],
-           'verifier': row[4],
-           'description': row[5]
+            'issue_id': str(row[0]),
+            'title': row[1],
+            'creator': row[2],
+            'resolver': row[3],
+            'verifier': row[4],
+            'description': row[5]
         } for row in issue_db]
         curs.close()
         conn.close()
@@ -104,13 +106,13 @@ def findUserIssues(user_id):
     except:
         print("error")
 
+
 '''
 Find the associated issues for the user with the given userId (user_id) based on the searchString provided as the parameter, and based on the assignment description
 '''
 
 
 def findIssueBasedOnExpressionSearchOnTitle(searchString):
-
     # TODO - find necessary issues using sql database based on search input
 
     print("search string '" + searchString + "'")
@@ -133,12 +135,31 @@ def findIssueBasedOnExpressionSearchOnTitle(searchString):
             'resolver': row[3],
             'verifier': row[4],
             'description': row[5]
-            } for row in issue_db]
+        } for row in issue_db]
         curs.close()
         conn.close()
         return issue
     except:
         print("error")
+
+
+def checkUserInput(userInput):
+    conn = openConnection()
+    if type(userInput) is int:
+        userId = userInput
+    try:
+        curs = conn.cursor()
+        curs.execute("""SELECT USER_ID, USERNAME FROM A3_USER""")
+        row = curs.fetchone()
+        while row is not None:
+            if userInput==row[1]:
+                userId=row[0]
+            row=curs.fetchone()
+
+    except:
+        print("")
+    return userId
+
 
 ###
 
@@ -155,20 +176,24 @@ def addIssue(title, creator, resolver, verifier, description):
     print("In Add Issue")
     conn = openConnection()
     try:
-        curs = conn.cursor()
-        curs.execute("""Insert into A3_ISSUE (TITLE,DESCRIPTION,CREATOR,RESOLVER,VERIFIER) values (%s,%s,%s,%s,%s)""",(title,description,creator,resolver,verifier,))
+        creator=checkUserInput(creator)
+        resolver=checkUserInput(resolver)
+        verifier=checkUserInput(verifier)
+        cursor = conn.cursor()
+        cursor.execute("""Insert into A3_ISSUE (TITLE,DESCRIPTION,CREATOR,RESOLVER,VERIFIER) values (%s,%s,%s,%s,%s)""",
+                       (title, description, creator, resolver, verifier,))
+        cursor.close()
         conn.commit()
-        curs.close()
+
 
 
     except psycopg2.Error as sqle:
         print("psycopg2.Error : " + sqle.pgerror)
-        curs.close()
+        cursor.close()
         conn.close()
         return False
-
     else:
-        curs.close()
+        cursor.close()
         conn.close()
         return True
 
@@ -181,13 +206,15 @@ def updateIssue(title, creator, resolver, verifier, description, issue_id):
 
     conn = openConnection()
     try:
-        curs =conn.cursor()
+        creator = checkUserInput(creator)
+        resolver = checkUserInput(resolver)
+        verifier = checkUserInput(verifier)
+        curs = conn.cursor()
         update_query = """UPDATE A3_ISSUE SET TITLE = %s, DESCRIPTION = %s, CREATOR = %s, RESOLVER = %s, VERIFIER = %s WHERE ISSUE_ID = %s"""
         update_data = (title, description, creator, resolver, verifier, issue_id,)
         curs.execute(update_query, update_data)
         conn.commit()
         curs.close()
-
 
     except psycopg2.Error as sqle:
         print("psycopg2.Error : " + sqle.pgerror)
@@ -199,7 +226,3 @@ def updateIssue(title, creator, resolver, verifier, description, issue_id):
         curs.close()
         conn.close()
         return True
-
-
-
-
