@@ -4,6 +4,16 @@ import psycopg2
 #####################################################
 ##  Database Connect
 #####################################################
+###
+## Author Information:
+##
+## Dayun_Liu_STUDENT_ID : "490536519"
+## Bonan_Liu_STUDENT_ID : "490219874"
+## Qijing_Yan_STUDENT_ID ; "490332368"
+##
+##
+
+
 
 '''
 Connects to the database using the connection string
@@ -12,7 +22,7 @@ Connects to the database using the connection string
 
 def openConnection():
     # connection parameters - ENTER YOUR LOGIN AND PASSWORD HERE
-    # TODO - 用自己的用户名登陆
+
 
     userid = "y20s1c9120_dliu8727"
     passwd = "490536519"
@@ -40,18 +50,18 @@ See assignment description for how to load user associated issues based on the u
 
 
 def checkUserCredentials(userName):
-    userInfo = []
     conn = openConnection()
+
     try:
         curs = conn.cursor()
-        # execute the query
-        curs.execute("SELECT USER_ID,USERNAME,FIRSTNAME,LASTNAME FROM a3_user")
-
+        curs.execute("BEGIN;")
+        curs.callproc('SearchUserName', [str(userName)])
         #  loop through the resultset
         nr = 0
         row = curs.fetchone()
         nameState = False
         while row is not None:
+            print(row[nr])
             nr += 1
             if userName == row[1]:
                 nameState = True
@@ -127,7 +137,6 @@ def findIssueBasedOnExpressionSearchOnTitle(searchString):
                     join a3_user c on (a3_issue_new.verifier = c.user_id) 
                     order by title;""", (searchString,))
         issue_db = curs.fetchall()
-
         issue = [{
             'issue_id': str(row[0]),
             'title': row[1],
@@ -145,20 +154,22 @@ def findIssueBasedOnExpressionSearchOnTitle(searchString):
 
 def checkUserInput(userInput):
     conn = openConnection()
-    if type(userInput) is int:
-        userId = userInput
+    userId = None
     try:
         curs = conn.cursor()
         curs.execute("""SELECT USER_ID, USERNAME FROM A3_USER""")
         row = curs.fetchone()
         while row is not None:
-            if userInput==row[1]:
-                userId=row[0]
-            row=curs.fetchone()
-
-    except:
-        print("")
-    return userId
+            if userInput == row[1]:
+                userId = row[0]
+            row = curs.fetchone()
+    except psycopg2.Error as sqle:
+        print("psycopg2.Error : " + sqle.pgerror)
+    curs.close()
+    conn.close()
+    if userId is not None:
+        return userId
+    return userInput
 
 
 ###
@@ -168,25 +179,16 @@ def checkUserInput(userInput):
 #####################################################
 # Add the details for a new issue to the database - details for new issue provided as parameters
 def addIssue(title, creator, resolver, verifier, description):
-    # TODO - add an issue
-    # Insert a new issue to database
-    # return False if adding was unsuccessful
-    # return True if adding was successful
-
-    print("In Add Issue")
     conn = openConnection()
     try:
-        creator=checkUserInput(creator)
-        resolver=checkUserInput(resolver)
-        verifier=checkUserInput(verifier)
+        creator = checkUserInput(creator)
+        resolver = checkUserInput(resolver)
+        verifier = checkUserInput(verifier)
         cursor = conn.cursor()
         cursor.execute("""Insert into A3_ISSUE (TITLE,DESCRIPTION,CREATOR,RESOLVER,VERIFIER) values (%s,%s,%s,%s,%s)""",
                        (title, description, creator, resolver, verifier,))
         cursor.close()
         conn.commit()
-
-
-
     except psycopg2.Error as sqle:
         print("psycopg2.Error : " + sqle.pgerror)
         cursor.close()
@@ -199,11 +201,9 @@ def addIssue(title, creator, resolver, verifier, description):
 
 
 # Update the details of an issue having the provided issue_id with the values provided as parameters
+# return False if adding was unsuccessful
+# return True if adding was successful
 def updateIssue(title, creator, resolver, verifier, description, issue_id):
-    # TODO - update the issue using db
-    # return False if adding was unsuccessful
-    # return True if adding was successful
-
     conn = openConnection()
     try:
         creator = checkUserInput(creator)
@@ -215,13 +215,11 @@ def updateIssue(title, creator, resolver, verifier, description, issue_id):
         curs.execute(update_query, update_data)
         conn.commit()
         curs.close()
-
     except psycopg2.Error as sqle:
         print("psycopg2.Error : " + sqle.pgerror)
         curs.close()
         conn.close()
         return False
-
     else:
         curs.close()
         conn.close()
